@@ -2,9 +2,9 @@ import React, {Component} from 'react';
 import logo from './logo.svg';
 import './App.css';
 import Login from './Login';
-import StatusBar from './StatusBar';
 import NavList from './NavList';
 import MainView from './MainView';
+
 
 class App extends Component {
 
@@ -25,8 +25,7 @@ class App extends Component {
         .handleLogin
         .bind(this)}/>
     return <div>
-      <StatusBar userName={'Tester'}/>
-      <NavList/>
+      <NavList userName={'Tester'}/>
       <MainView/>
     </div>
   }
