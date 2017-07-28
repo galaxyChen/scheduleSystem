@@ -25,3 +25,19 @@
     width: 100%;
 }
 
+.task:hover{
+    background-color: rgb(249,249,249);
+}
+
+.right-space {
+    margin-right: 15px;
+}
+
+.time-select {
+    margin-bottom: 10px;
+}
+
+.time-picker {
+    margin: 0 auto;
+    width: 300px;
+}

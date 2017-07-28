@@ -7,6 +7,7 @@ import Grid from 'react-bootstrap/lib/Grid';
 import Row from 'react-bootstrap/lib/Row';
 import Col from 'react-bootstrap/lib/Col';
 import AddModal from './AddModal';
+import './css.css';
 
 class Task extends Component {
     constructor(props) {
@@ -56,7 +57,7 @@ class Task extends Component {
         data.state = stateList[data.status];
         data.stateTitle = stateTitle[data.status];
         return (
-            <div onClick={this.show.bind(this)}>
+            <div onClick={this.show.bind(this)} className="task">
                 <Grid>
                     <Row>
                         <Col sm={9} xs={9} md={9}>
