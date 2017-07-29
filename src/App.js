@@ -11,7 +11,8 @@ class App extends Component {
   constructor() {
     super();
     this.state = {
-      login: true
+      login: true,
+      user:'test'
     }
   }
 
@@ -26,7 +27,7 @@ class App extends Component {
         .bind(this)}/>
     return <div>
       <NavList userName={'Tester'}/>
-      <MainView/>
+      <MainView usn={this.state.user}/>
     </div>
   }
 }

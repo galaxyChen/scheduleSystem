@@ -31,11 +31,13 @@ class Task extends Component {
     }
 
     changeStatus(e) {
+        var event = window.event || arguments.callee.caller.arguments[0];
         var stateList = ['doing', 'wait', 'emergent', 'todo', 'finish'];
         var newState = stateList[e];
         this
             .props
             .changeTask(newState);
+        event.stopPropagation();
     }
 
     render() {
@@ -57,11 +59,11 @@ class Task extends Component {
         data.state = stateList[data.status];
         data.stateTitle = stateTitle[data.status];
         return (
-            <div onClick={this.show.bind(this)} className="task">
+            <div className="task">
                 <Grid>
                     <Row>
-                        <Col sm={9} xs={9} md={9}>
-                            <a className="h3">{data.title}
+                        <Col sm={9} xs={9} md={9} onClick={this.show.bind(this)}>
+                            <a className="h3" >{data.title}
                             </a>
                         </Col>
                         <Col sm={3} xs={3} md={3}>
@@ -79,7 +81,7 @@ class Task extends Component {
                         </Col>
                     </Row>
                 </Grid>
-                <AddModal show={this.state.show} close={this.close.bind(this)}/>
+                <AddModal show={this.state.show} close={this.close.bind(this)} />
             </div>
         );
     }

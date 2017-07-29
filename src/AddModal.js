@@ -12,19 +12,26 @@ import Panel from 'react-bootstrap/lib/Panel';
 import Glyphicon from 'react-bootstrap/lib/Glyphicon';
 import InfiniteCalendar from 'react-infinite-calendar';
 import 'react-infinite-calendar/styles.css';
+import Sender from './sender';
 
 class AddModal extends Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            title: '添加日程',
-            date:'',
+            modalTitle: '添加日程',
+            beginDate:'',
+            endDate:'',
+            beginDateForShow:'',
+            endDateForShow:'',
             beginTime:"",
             endTime:"",
             timeSelect:true,
             showBeginTimePicker:false,
-            showEndTimePicker:false
+            showEndTimePicker:false,
+            statusTitle:'进行中',
+            statusStyle:'primary',
+            status:'doing'
         }
     }
 
@@ -32,11 +39,14 @@ class AddModal extends Component {
 
     componentWillMount() {
         var date = new Date();
-        var dateDefault = date.getFullYear()+"-"+date.getMonth()+"-"+date.getDay();
+        var dateDefault = date.getFullYear()+"-"+(date.getMonth()+1)+"-"+date.getDate();
         var beginTime = '上午';
         var endTime = '下午';
         this.setState({
-            date:dateDefault,
+            beginData:date,
+            endDate:date,
+            beginDateForShow:dateDefault,
+            endDateForShow:dateDefault,
             beginTime:beginTime,
             endTime:endTime
         })
@@ -66,7 +76,27 @@ class AddModal extends Component {
     }
 
     changeText(type,e){
-        console.log(type,e.target.value);
+        if (type=='title'){
+            this.setState({
+                title:e.target.value
+            })
+        } else {
+            this.setState({
+                description:e.target.value
+            })
+        }
+    }
+
+    changeStatus(e) {
+        var event = window.event || arguments.callee.caller.arguments[0];
+        var stateList = ['doing', 'wait', 'emergent', 'todo', 'finish'];
+        var stateTitle=['进行中','等待','紧急','待安排','完成'];
+        var stateStyle=['primary','warning','danger','info','success'];
+        this.setState({
+            status:stateList[e],
+            statusTitle:stateTitle[e],
+            statusStyle:stateStyle[e]
+        })
     }
 
     showTimePicker(type){
@@ -99,22 +129,62 @@ class AddModal extends Component {
             endDate:date
         })
     }
+
+    generateTime(type){
+        var date = type=='begin'?this.state.beginDate:this.state.endDate;
+        var time = type=='begin'?this.state.beginTime:this.state.endTime;
+        switch(time){
+            case '上午':date.setHours(0);
+                        break;
+            case '中午':date.setHours(12);
+                        break;
+            case '下午':date.setHours(14);
+                        break;   
+            case '傍晚':date.setHours(17);
+                        break;        
+            case '晚上':date.setHours(19);
+                        break;
+        }
+        return date.valueOf();
+    }
+
+    commitAdd(){
+        if (this.state.beginDate>this.state.endDate){
+            alert("结束时间不能比开始时间更早！");
+            return ;            
+        }
+        var data={};
+        if (this.state.title==''){
+            alert("标题必须填写！");
+            return ;
+        } else data['title']=this.state.title;
+        if (this.state.description)
+            data['description']=this.state.description;
+        if (this.state.timeSelect){
+            data['begin']=this.generateTime('beign');
+            data['end']=this.generateTime('end');
+        }
+        data['status']=this.state.status;
+        if (!this.state.timeSelect)
+            data['status']='todo';
+        this.props.commitAdd(data);
+    }
     
 
     confirmBeginTime(){
         var date=this.state.beginDate;
-        var dateDefault = date.getFullYear()+"-"+date.getMonth()+"-"+date.getDay();
+        var dateDefault = date.getFullYear()+"-"+(date.getMonth()+1)+"-"+date.getDate();
         this.setState({
-            date:dateDefault,
+            beginDateForShow:dateDefault,
             showBeginTimePicker:false
         })
     }
 
     confirmEndTime(){
         var date=this.state.endDate;
-        var dateDefault = date.getFullYear()+"-"+date.getMonth()+"-"+date.getDay();
+        var dateDefault = date.getFullYear()+"-"+(date.getMonth()+1)+"-"+date.getDate();
         this.setState({
-            date:dateDefault,
+            endDateForShow:dateDefault,
             showEndTimePicker:false
         })
     }
@@ -125,11 +195,11 @@ class AddModal extends Component {
 
             <Modal show={this.props.show} onHide={this.props.close}>
                 <Modal.Header closeButton>
-                    <Modal.Title>{this.state.title}</Modal.Title>
+                    <Modal.Title>{this.state.modalTitle}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                 
-                 <FormGroup controlId="formBasicText"
+                 <FormGroup controlId="formBasicText" 
                     >
                     <ControlLabel>标题</ControlLabel>
                     <FormControl
@@ -157,7 +227,7 @@ class AddModal extends Component {
                                 <a className='h4 right-space'>
                                     开始时间
                                 </a>
-                                <Button className='right-space' onClick={this.showTimePicker.bind(this,'begin')}>{this.state.date}</Button>
+                                <Button className='right-space' onClick={this.showTimePicker.bind(this,'begin')}>{this.state.beginDateForShow}</Button>
                                 
                                 <Modal show={this.state.showBeginTimePicker} onHide={this.closeTimePicker.bind(this)}>
                                     <Modal.Header>
@@ -206,7 +276,7 @@ class AddModal extends Component {
                                 <a className='h4 right-space'>
                                     结束时间
                                 </a>
-                                <Button className='right-space' onClick={this.showTimePicker.bind(this,'end')}>{this.state.date}</Button>
+                                <Button className='right-space' onClick={this.showTimePicker.bind(this,'end')}>{this.state.endDateForShow}</Button>
 
                                 <Modal show={this.state.showEndTimePicker} onHide={this.closeTimePicker.bind(this)}>
                                     <Modal.Header>
@@ -250,13 +320,25 @@ class AddModal extends Component {
                             </div>
                         </Panel>
                     </FormGroup>
-
-
+                    <div className="status-button">
+                    <DropdownButton
+                                
+                                bsStyle={this.state.statusStyle}
+                                title={this.state.statusTitle}
+                                onSelect={this.changeStatus.bind(this)}
+                                id={'status'}>
+                                <MenuItem eventKey={0}>进行中</MenuItem>
+                                <MenuItem eventKey={1}>等待</MenuItem>
+                                <MenuItem eventKey={2}>紧急</MenuItem>
+                                <MenuItem eventKey={3}>将做</MenuItem>
+                                <MenuItem eventKey={4}>完成</MenuItem>
+                            </DropdownButton>
+                    </div>
                     <Button disabled><Glyphicon glyph="plus-sign" />&nbsp;&nbsp;&nbsp;&nbsp;添加子任务</Button>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button bsStyle="primary">确定</Button>
-                    <Button bsStyle="danger">取消</Button>
+                    <Button bsStyle="primary" onClick={this.commitAdd.bind(this)}>确定</Button>
+                    <Button bsStyle="danger" onClick={this.props.close}>取消</Button>
                 </Modal.Footer>
             </Modal>
 
@@ -266,7 +348,8 @@ class AddModal extends Component {
 
 AddModal.propTypes = {
     show: PropTypes.bool.isRequired,
-    close: PropTypes.func.isRequired
+    close: PropTypes.func.isRequired,
+    commitAdd:PropTypes.func.isRequired
 };
 
 export default AddModal;
