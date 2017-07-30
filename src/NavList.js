@@ -18,7 +18,7 @@ class NavList extends Component {
 
     getBrand() {
         var date = new Date();
-        return this.props.userName+"    " + date.getFullYear() + "年" + date.getMonth() + "月" + date.getDay() + "日";
+        return this.props.userName+"    " + date.getFullYear() + "年" + (date.getMonth()+1) + "月" + date.getDate() + "日";
     }
 
     render() {

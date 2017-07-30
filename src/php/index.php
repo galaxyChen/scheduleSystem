@@ -15,6 +15,8 @@ switch ($data->ins){
                 break;
     case 'query':query($data);
                 break;
+    case 'changeStatus':changeStatus($data);
+                break;
 }
 
 function runTest($data){
@@ -35,6 +37,7 @@ function add($data){
     $response=array();
     if (gettype($result)=='integer'){
         $response['status']=1;
+        $response['id']=$result;
     } else {
         $response['status']=0;
         $response['error']=$result;
@@ -46,16 +49,35 @@ function query($data){
     $sql = new SQL();
     $sql->type = 's';
     $sql->table = 'task';
-    $sql->add_col('usn',$data->usn);
+    $sql->add('usn',$data->usn);
     $result = mysqli_run($sql);
-    if (gettype($result)=='integer'){
-        $response=array();
+    $response=array();    
+    if (gettype($result)=='array'){
         $response['status']=1;
+        $response['data']=$result;
     } else {
-        $response=array();
         $response['status']=0;
         $response['error']=$result;
     }
+    echo json_encode($response);
+}
+
+function changeStatus($data){
+    $sql = new SQL();
+    $sql->type = 'u';
+    $sql->table = 'task';
+    $sql->add('task_id',$data->id);
+    $sql->add_update_col('status',$data->status);
+    $result=mysqli_run($sql);
+    $response=array();
+    if (gettype($result)=='integer'){
+        $response['status']=1;
+        $response['id']=$result;
+    } else {
+        $response['status']=0;
+        $response['error']=$result;
+    }
+    echo json_encode($response);
 }
 
 ?>

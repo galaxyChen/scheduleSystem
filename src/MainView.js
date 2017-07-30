@@ -19,6 +19,32 @@ class MainView extends Component {
         }
     }
 
+    
+    componentWillMount() {
+        var sender = new Sender();
+        var data = {
+            ins:'query',
+            option:'task',
+            usn:this.props.usn
+        }
+        sender.getData(data,this.setData.bind(this));
+    }
+
+    setData(data){
+        if (typeof data=='string'){
+            document.write(data);
+            return;
+        }
+        if (data.status==1){
+            this.setState({
+                data:data.data
+            })
+        } else {
+            alert(data.error);
+        }
+    }
+    
+
     close(){
         this.setState({
             show:false
@@ -31,6 +57,66 @@ class MainView extends Component {
         })
     }
 
+    checkUndo(data){
+        //check if it needs to undo
+        if (typeof data=='string'){
+            document.write(data);
+            return;
+        }
+        if (data.status!=1){
+            //undo
+            var data = this.state.data;
+            for (var i=0;i<data.length;i++)
+                if (data[i].task_id===this.state.oldData.task_id){
+                    data[i]=this.state.oldData;
+                    break;
+                }
+            this.setState({
+                data:data
+            })
+        }
+    }
+
+    changeTask(id,status){
+        var ins = {
+            ins:'changeStatus',
+            id:id,
+            status:status
+        }
+        var data = this.state.data,
+        oldData ;
+        for (var i=0;i<data.length;i++){
+            if (data[i].task_id===id){
+                oldData = JSON.parse(JSON.stringify(data[i]));
+                data[i].status = status;
+                break;
+            }
+        }
+
+        var sender = new Sender();
+        sender.getData(ins,this.checkUndo.bind(this));
+        this.setState({
+            data:data,
+            oldData:oldData
+        })
+    }
+
+    reflashData(data){
+        if (typeof data=='string'){
+            document.write(data);
+            return;
+        }
+        if (data.status==1){
+            var dataToAdd = JSON.parse(JSON.stringify(this.state.dataToAdd));
+            dataToAdd.task_id = data.id;
+            this.setState({
+                data:this.state.data.concat(dataToAdd)
+            })
+        } else {
+            alert(data.error);
+        }
+    }
+
     commitAdd(data){
         var ins = {
             ins:'add',
@@ -38,7 +124,10 @@ class MainView extends Component {
             data:data
         }
         var sender = new Sender();
-        sender.getData(ins);
+        sender.getData(ins,this.reflashData.bind(this));
+        this.setState({
+            dataToAdd:data
+        })
         this.close();
     }
 
@@ -48,12 +137,12 @@ class MainView extends Component {
                 <Grid fluid>
                     <Row>
                         <Col xsHidden sm={3} md={3}><Fliter /></Col>
-                        <Col sm={5} md={5}>
+                        <Col sm={8} md={8}>
                             <Row>
                                 <Col sm={3} md={3}><Button onClick={this.showAdd.bind(this)}><Glyphicon glyph="plus-sign" />添加日程</Button></Col>
                             </Row>
                             <Row>
-                                <Col><TaskList /></Col>
+                                <Col><TaskList data={this.state.data||[]} mode={'normal'} changeTask={this.changeTask.bind(this)}/></Col>
                             </Row>
                         </Col>
                     </Row>

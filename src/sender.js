@@ -15,18 +15,14 @@ function sender(){
                 .then((response) => {
                     //resolve fetch
                     if (response.ok) {
-                        // response.text().then((data)=>{
-                        //     document.write(data);
-                        // })
-                        // return;
-                        response
-                            .json()
-                            .then((data) => {
-                                //json success
-                                received(data);
-                            }, (err) => {
-                                document.body.innerHTML = err;
-                            })
+                        response.text().then((data)=>{
+                            try {
+                                data = JSON.parse(data);
+                            } catch(e) {
+
+                            }
+                            received(data);
+                        })
                     } else {
                         //not ok
                         document.body.innerHTML ="network fail";

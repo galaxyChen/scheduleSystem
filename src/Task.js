@@ -36,8 +36,12 @@ class Task extends Component {
         var newState = stateList[e];
         this
             .props
-            .changeTask(newState);
+            .changeTask(this.props.data.task_id,newState);
         event.stopPropagation();
+    }
+
+    commitEdit(){
+
     }
 
     render() {
@@ -60,18 +64,18 @@ class Task extends Component {
         data.stateTitle = stateTitle[data.status];
         return (
             <div className="task">
-                <Grid>
+                <Grid fluid>
                     <Row>
-                        <Col sm={9} xs={9} md={9} onClick={this.show.bind(this)}>
-                            <a className="h3" >{data.title}
+                        <Col sm={10} xs={10} md={10} onClick={this.show.bind(this)}>
+                            <a className="h4 task-title" >{data.title}
                             </a>
                         </Col>
-                        <Col sm={3} xs={3} md={3}>
+                        <Col sm={2} xs={2} md={2}>
                             <DropdownButton
                                 bsStyle={data.state}
                                 title={data.stateTitle}
                                 onSelect={this.changeStatus.bind(this)}
-                                id={data.id}>
+                                id={data.task_id}>
                                 <MenuItem eventKey={0}>进行中</MenuItem>
                                 <MenuItem eventKey={1}>等待</MenuItem>
                                 <MenuItem eventKey={2}>紧急</MenuItem>
@@ -81,7 +85,7 @@ class Task extends Component {
                         </Col>
                     </Row>
                 </Grid>
-                <AddModal show={this.state.show} close={this.close.bind(this)} />
+                <AddModal show={this.state.show} close={this.close.bind(this)} commitAdd={this.commitEdit.bind(this)}/>
             </div>
         );
     }
