@@ -77,22 +77,23 @@ class MainView extends Component {
         }
     }
 
-    changeTask(id,status){
+    changeTask(id,newData){
         var ins = {
-            ins:'changeStatus',
+            ins:'update',
             id:id,
-            status:status
+            data:newData
         }
         var data = this.state.data,
         oldData ;
         for (var i=0;i<data.length;i++){
             if (data[i].task_id===id){
                 oldData = JSON.parse(JSON.stringify(data[i]));
-                data[i].status = status;
+                for (name in newData){
+                    data[i][name]=newData[name];
+                }
                 break;
             }
         }
-
         var sender = new Sender();
         sender.getData(ins,this.checkUndo.bind(this));
         this.setState({
@@ -147,7 +148,7 @@ class MainView extends Component {
                         </Col>
                     </Row>
                 </Grid>
-                <AddModal show={this.state.show} close={this.close.bind(this)} commitAdd={this.commitAdd.bind(this)}/>
+                <AddModal show={this.state.show} close={this.close.bind(this)} commitAdd={this.commitAdd.bind(this)} data={{isAdd:true}}/>
             </div>
         );
     }

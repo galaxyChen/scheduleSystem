@@ -17,44 +17,108 @@ import Sender from './sender';
 class AddModal extends Component {
     constructor(props) {
         super(props);
-
+        var isEdit=false;
+        var modalTitle = '添加日程';
+        var timeSelect = true;
+        var status="doing";
+        // console.log(props);
+        if (!props.data.isAdd){
+            isEdit=true;
+            modalTitle = '修改日程';
+            timeSelect = props.data.begin&&props.data.end;
+            status = props.data.status;
+        }
+        var stateList = {
+            doing: 'primary',
+            finish: 'success',
+            todo: 'info',
+            wait: 'warning',
+            emergent: 'danger'
+        }
+        var stateTitle = {
+            doing: '进行中',
+            finish: '已完成',
+            todo: '将做',
+            wait: '等待',
+            emergent: '紧急'
+        }
+        var statusTitle = stateTitle[status];
+        var statusStyle = stateList[status];
         this.state = {
-            modalTitle: '添加日程',
+            modalTitle: modalTitle,
             beginDate:'',
             endDate:'',
             beginDateForShow:'',
             endDateForShow:'',
             beginTime:"",
             endTime:"",
-            timeSelect:true,
+            timeSelect:timeSelect,
             showBeginTimePicker:false,
             showEndTimePicker:false,
-            statusTitle:'进行中',
-            statusStyle:'primary',
-            status:'doing'
+            statusTitle:statusTitle,
+            statusStyle:statusStyle,
+            status:status,
+            isEdit:isEdit
         }
     }
 
-    
+    getTimeHelper(date){
+        var result="";
+        switch(date.getHours()){
+                case 0:result='上午';
+                        break;
+                case 12:result='中午';
+                        break;
+                case 14:result='下午';
+                        break;
+                case 17:result='傍晚';
+                        break;
+                case 19:result='晚上';
+                        break;
+            }
+        return result;
+    }
 
     componentWillMount() {
-        var date = new Date();
-        var dateDefault = date.getFullYear()+"-"+(date.getMonth()+1)+"-"+date.getDate();
+        var beginDate = new Date();
+        var endDate = new Date();
         var beginTime = '上午';
         var endTime = '下午';
+        var timeSelect=true;
+        if (!this.props.data.isAdd){
+            if (!this.props.data.begin){
+                timeSelect=false;
+            } else {
+                beginDate = new Date(this.props.data.begin-0);
+                endDate = new Date(this.props.data.end-0);
+                beginTime = this.getTimeHelper(beginDate);
+                endTime = this.getTimeHelper(endDate);
+            }
+        }
+        var beginDateForSHow = beginDate.getFullYear()+"-"+(beginDate.getMonth()+1)+"-"+beginDate.getDate();
+        var endDateForShow = endDate.getFullYear()+"-"+(endDate.getMonth()+1)+"-"+endDate.getDate();
         this.setState({
-            beginData:date,
-            endDate:date,
-            beginDateForShow:dateDefault,
-            endDateForShow:dateDefault,
+            beginDate:beginDate,
+            endDate:endDate,
+            beginDateForShow:beginDateForSHow,
+            endDateForShow:endDateForShow,
             beginTime:beginTime,
-            endTime:endTime
+            endTime:endTime,
+            timeSelect:timeSelect
         })
     }
     
 
     changeTimeSelect(e) {
         //to set future option
+        if (this.state.isEdit){
+            var changeList = this.state.changeList||[];
+            changeList['begin']=true;
+            changeList['end']=true;
+            this.setState({
+                changeList:changeList
+            })
+        }
         this.setState({
             timeSelect:!e.target.checked
         })
@@ -63,6 +127,14 @@ class AddModal extends Component {
     changeTime(e){
         //use for change the time (AM,PM) 
         //0-4 begin, 5-9 end
+        if (this.state.isEdit){
+            var changeList = this.state.changeList||[];
+            var type = e>4?'end':'begin'
+            changeList[type]=true;
+            this.setState({
+                changeList:changeList
+            })
+        }
         var title=['上午','中午','下午','傍晚','晚上'];
         if (e<=5){
             this.setState({
@@ -76,6 +148,13 @@ class AddModal extends Component {
     }
 
     changeText(type,e){
+        if (this.state.isEdit){
+            var changeList = this.state.changeList||[];
+            changeList[type]=true;
+            this.setState({
+                changeList:changeList
+            })
+        }
         if (type=='title'){
             this.setState({
                 title:e.target.value
@@ -88,6 +167,13 @@ class AddModal extends Component {
     }
 
     changeStatus(e) {
+        if (this.state.isEdit){
+            var changeList = this.state.changeList||[];
+            changeList['status']=true;
+            this.setState({
+                changeList:changeList
+            })
+        }
         var event = window.event || arguments.callee.caller.arguments[0];
         var stateList = ['doing', 'wait', 'emergent', 'todo', 'finish'];
         var stateTitle=['进行中','等待','紧急','待安排','完成'];
@@ -133,6 +219,8 @@ class AddModal extends Component {
     generateTime(type){
         var date = type=='begin'?this.state.beginDate:this.state.endDate;
         var time = type=='begin'?this.state.beginTime:this.state.endTime;
+        // console.log(date);
+        // console.log(time);
         switch(time){
             case '上午':date.setHours(0);
                         break;
@@ -145,13 +233,50 @@ class AddModal extends Component {
             case '晚上':date.setHours(19);
                         break;
         }
+        // console.log(date.getHours());
         return date.valueOf();
+    }
+
+    commitEdit(){
+        if (!this.state.changeList){
+            this.props.close();
+            return;
+        }
+        var data={};
+        if (this.state.title==''){
+            alert("标题必须填写！");
+            return ;
+        } 
+        else if (this.state.changeList['title'])
+                data['title']=this.state.title;
+        if (this.state.changeList['description']){
+            console.log(this.state.description);
+            data['description']=this.state.description;
+        }
+        if (this.state.changeList['begin']){
+            data['begin']=this.generateTime('begin');
+        }
+        if (this.state.changeList['end']){
+            data['end']=this.generateTime('end');            
+        }
+        if (this.state.changeList['status'])
+            data['status']=this.state.status;
+        if ((this.state.changeList['status'])&&(!this.state.timeSelect)){
+            data['status']='todo';
+            data['begin']=null;
+            data['end']=null;
+        }
+        this.props.commitAdd(data);
     }
 
     commitAdd(){
         if (this.state.beginDate>this.state.endDate){
             alert("结束时间不能比开始时间更早！");
             return ;            
+        }
+        if (this.state.isEdit){
+            this.commitEdit();
+            return ;
         }
         var data={};
         if (this.state.title==''){
@@ -161,7 +286,7 @@ class AddModal extends Component {
         if (this.state.description)
             data['description']=this.state.description;
         if (this.state.timeSelect){
-            data['begin']=this.generateTime('beign');
+            data['begin']=this.generateTime('begin');
             data['end']=this.generateTime('end');
         }
         data['status']=this.state.status;
@@ -172,6 +297,13 @@ class AddModal extends Component {
     
 
     confirmBeginTime(){
+        if (this.state.isEdit){
+            var changeList = this.state.changeList||[];
+            changeList['begin']=true;
+            this.setState({
+                changeList:changeList
+            })
+        }
         var date=this.state.beginDate;
         var dateDefault = date.getFullYear()+"-"+(date.getMonth()+1)+"-"+date.getDate();
         this.setState({
@@ -181,6 +313,13 @@ class AddModal extends Component {
     }
 
     confirmEndTime(){
+        if (this.state.isEdit){
+            var changeList = this.state.changeList||[];
+            changeList['end']=true;
+            this.setState({
+                changeList:changeList
+            })
+        }
         var date=this.state.endDate;
         var dateDefault = date.getFullYear()+"-"+(date.getMonth()+1)+"-"+date.getDate();
         this.setState({
@@ -205,6 +344,7 @@ class AddModal extends Component {
                     <FormControl
                         type="text"
                         placeholder="任务标题"
+                        defaultValue={this.props.data.title||""}
                         onChange={this.changeText.bind(this,'title')}
                     />
                 </FormGroup>
@@ -215,10 +355,11 @@ class AddModal extends Component {
                         <FormControl
                             componentClass="textarea"
                             placeholder="描述"
-                            onChange={this.changeText.bind(this,'description')}/>
+                            onChange={this.changeText.bind(this,'description')}
+                            defaultValue={this.props.data.description||""}/>
+                            
 
-
-                        <Checkbox onChange={this.changeTimeSelect.bind(this)}>
+                        <Checkbox onChange={this.changeTimeSelect.bind(this)} checked={!this.state.timeSelect}>
                             将来
                         </Checkbox>
 
@@ -349,7 +490,8 @@ class AddModal extends Component {
 AddModal.propTypes = {
     show: PropTypes.bool.isRequired,
     close: PropTypes.func.isRequired,
-    commitAdd:PropTypes.func.isRequired
+    commitAdd:PropTypes.func.isRequired,
+    data:PropTypes.object.isRequired
 };
 
 export default AddModal;

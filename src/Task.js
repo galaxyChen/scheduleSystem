@@ -34,14 +34,19 @@ class Task extends Component {
         var event = window.event || arguments.callee.caller.arguments[0];
         var stateList = ['doing', 'wait', 'emergent', 'todo', 'finish'];
         var newState = stateList[e];
+        var data = {
+            status:newState
+        }
         this
             .props
-            .changeTask(this.props.data.task_id,newState);
+            .changeTask(this.props.data.task_id,data);
         event.stopPropagation();
     }
 
-    commitEdit(){
-
+    commitEdit(data){
+        console.log(data);
+        this.props.changeTask(this.props.data.task_id,data);
+        this.close();
     }
 
     render() {
@@ -75,7 +80,7 @@ class Task extends Component {
                                 bsStyle={data.state}
                                 title={data.stateTitle}
                                 onSelect={this.changeStatus.bind(this)}
-                                id={data.task_id}>
+                                id={data.task_id||1}>
                                 <MenuItem eventKey={0}>进行中</MenuItem>
                                 <MenuItem eventKey={1}>等待</MenuItem>
                                 <MenuItem eventKey={2}>紧急</MenuItem>
@@ -85,7 +90,7 @@ class Task extends Component {
                         </Col>
                     </Row>
                 </Grid>
-                <AddModal show={this.state.show} close={this.close.bind(this)} commitAdd={this.commitEdit.bind(this)}/>
+                <AddModal show={this.state.show} close={this.close.bind(this)} commitAdd={this.commitEdit.bind(this)} data={this.props.data}/>
             </div>
         );
     }
