@@ -13,6 +13,7 @@ class NavList extends Component {
     }
 
     handleChangeTab(e) {
+        this.props.changeModule(e);
         this.setState({active: e})
     }
 
@@ -42,6 +43,8 @@ class NavList extends Component {
                         <NavItem eventKey={"today"}>今日待办</NavItem>
                         <NavItem eventKey={"tomorrow"}>明日待办</NavItem>
                         <NavItem eventKey={"schedule"}>日程</NavItem>
+                        <NavItem eventKey={"todo"}>待安排</NavItem>
+                        <NavItem eventKey={"wait"}>等待</NavItem>
                     </Nav>
                 </Navbar.Collapse>
             </Navbar>
@@ -50,7 +53,8 @@ class NavList extends Component {
 }
 
 NavList.propTypes = {
-    userName: PropTypes.string.isRequired
+    userName: PropTypes.string.isRequired,
+    changeModule:PropTypes.func.isRequired
 };
 
 export default NavList;

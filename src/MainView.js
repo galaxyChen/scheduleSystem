@@ -1,21 +1,22 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Grid from 'react-bootstrap/lib/Grid';
-import Row from 'react-bootstrap/lib/Row';
 import Col from 'react-bootstrap/lib/Col';
-import Fliter from './Fliter';
+import Filter from './Filter';
 import TaskList from './TaskList';
 import Button from 'react-bootstrap/lib/Button';
 import AddModal from './AddModal';
 import Glyphicon from 'react-bootstrap/lib/Glyphicon';
 import './css.css';
 import Sender from './sender';
+import FilterRules from './FilterRules';
 
 class MainView extends Component {
     constructor(props){
         super(props);
         this.state={
-            show:false
+            show:false,
+            mode:'time'
         }
     }
 
@@ -31,11 +32,11 @@ class MainView extends Component {
     }
 
     setData(data){
-        if (typeof data=='string'){
+        if (typeof data==='string'){
             document.write(data);
             return;
         }
-        if (data.status==1){
+        if (data.status===1){
             this.setState({
                 data:data.data
             })
@@ -59,13 +60,13 @@ class MainView extends Component {
 
     checkUndo(data){
         //check if it needs to undo
-        if (typeof data=='string'){
+        if (typeof data==='string'){
             document.write(data);
             return;
         }
-        if (data.status!=1){
+        if (data.status!==1){
             //undo
-            var data = this.state.data;
+            data = this.state.data;
             for (var i=0;i<data.length;i++)
                 if (data[i].task_id===this.state.oldData.task_id){
                     data[i]=this.state.oldData;
@@ -88,7 +89,7 @@ class MainView extends Component {
         for (var i=0;i<data.length;i++){
             if (data[i].task_id===id){
                 oldData = JSON.parse(JSON.stringify(data[i]));
-                for (name in newData){
+                for (var name in newData){
                     data[i][name]=newData[name];
                 }
                 break;
@@ -102,12 +103,12 @@ class MainView extends Component {
         })
     }
 
-    reflashData(data){
-        if (typeof data=='string'){
+    refreshData(data){
+        if (typeof data==='string'){
             document.write(data);
             return;
         }
-        if (data.status==1){
+        if (data.status===1){
             var dataToAdd = JSON.parse(JSON.stringify(this.state.dataToAdd));
             dataToAdd.task_id = data.id;
             this.setState({
@@ -125,28 +126,39 @@ class MainView extends Component {
             data:data
         }
         var sender = new Sender();
-        sender.getData(ins,this.reflashData.bind(this));
+        sender.getData(ins,this.refreshData.bind(this));
         this.setState({
             dataToAdd:data
         })
         this.close();
     }
 
+    changeMode(mode){
+        this.setState({
+            mode:mode
+        })
+    }
+
     render() {
+        var filter = new FilterRules();
+        var taskList = filter.filterData(this.props.module,this.state.mode,this.state.data);
         return (
             <div>
                 <Grid fluid>
-                    <Row>
-                        <Col xsHidden sm={3} md={3}><Fliter /></Col>
-                        <Col sm={8} md={8}>
-                            <Row>
-                                <Col sm={3} md={3}><Button onClick={this.showAdd.bind(this)}><Glyphicon glyph="plus-sign" />添加日程</Button></Col>
-                            </Row>
-                            <Row>
-                                <Col><TaskList data={this.state.data||[]} mode={'normal'} changeTask={this.changeTask.bind(this)}/></Col>
-                            </Row>
+                    
+                        <Col xsHidden sm={3} md={3}>
+                            <Filter changeMode={this.changeMode.bind(this)}/></Col>
+                        <Col sm={8} md={8} xs={12}>
+                            
+                                <Col sm={3} md={3} xs={3}>
+                                    <Button onClick={this.showAdd.bind(this)}><Glyphicon glyph="plus-sign" />添加日程</Button>
+                                </Col>
+                                <Col xs={12}>
+                                    <TaskList data={taskList} mode={'normal'} changeTask={this.changeTask.bind(this)}/>
+                                </Col>
+                            
                         </Col>
-                    </Row>
+                    
                 </Grid>
                 <AddModal show={this.state.show} close={this.close.bind(this)} commitAdd={this.commitAdd.bind(this)} data={{isAdd:true}}/>
             </div>
@@ -155,7 +167,8 @@ class MainView extends Component {
 }
 
 MainView.propTypes = {
-    usn:PropTypes.string.isRequired
+    usn:PropTypes.string.isRequired,
+    module:PropTypes.string.isRequired
 };
 
 export default MainView;

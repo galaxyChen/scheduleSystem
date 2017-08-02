@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import Button from 'react-bootstrap/lib/Button';
 import DropdownButton from 'react-bootstrap/lib/DropdownButton';
 import MenuItem from 'react-bootstrap/lib/MenuItem';
 import Grid from 'react-bootstrap/lib/Grid';
@@ -49,6 +48,19 @@ class Task extends Component {
         this.close();
     }
 
+    renderTime(time){
+        if (time===undefined)
+            return "无";
+        var date = new Date(time-0);
+
+        return date.getMonth()+1+"-"+date.getDate();
+    }
+
+    renderTitle(title){
+        //add some length control if needed
+        return title;
+    }
+
     render() {
         var data = JSON.parse(JSON.stringify(this.props.data));
         var stateList = {
@@ -71,16 +83,25 @@ class Task extends Component {
             <div className="task">
                 <Grid fluid>
                     <Row>
-                        <Col sm={10} xs={10} md={10} onClick={this.show.bind(this)}>
-                            <a className="h4 task-title" >{data.title}
+                        <Col sm={6} xs={8} md={6} onClick={this.show.bind(this)}>
+                            <a className="h4 task-title" >{this.renderTitle(data.title)}
                             </a>
                         </Col>
-                        <Col sm={2} xs={2} md={2}>
+                        <Col sm={2} md={2} xsHidden>
+                             <a className="h4 task-title" >{"从:"+this.renderTime(data.begin)}
+                            </a>
+                        </Col>
+                        <Col sm={2} md={2} xsHidden>
+                             <a className="h4 task-title" >{"到:"+this.renderTime(data.end)}
+                             </a>
+                        </Col>
+                        <Col sm={2} xs={4} md={2}>
                             <DropdownButton
                                 bsStyle={data.state}
                                 title={data.stateTitle}
                                 onSelect={this.changeStatus.bind(this)}
-                                id={data.task_id||1}>
+                                id={data.task_id||1}
+                                >
                                 <MenuItem eventKey={0}>进行中</MenuItem>
                                 <MenuItem eventKey={1}>等待</MenuItem>
                                 <MenuItem eventKey={2}>紧急</MenuItem>

@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import Navbar from 'react-bootstrap/lib/Navbar';
 import Nav from 'react-bootstrap/lib/Nav';
 import NavItem from 'react-bootstrap/lib/NavItem';
 
@@ -14,6 +13,7 @@ class Fliter extends Component {
     }
 
     handleSelect(e){
+        this.props.changeMode(e);
         this.setState({
             active:e
         })
@@ -33,7 +33,7 @@ class Fliter extends Component {
 }
 
 Fliter.propTypes = {
-
+    changeMode:PropTypes.func.isRequired
 };
 
 export default Fliter;

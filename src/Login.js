@@ -14,28 +14,31 @@ class Login extends Component {
     }
 
     submit(type) {
-        var event = window.event || arguments.callee.caller.arguments[0]
+        var event = window.event || arguments.callee.caller.arguments[0];
         var usn = this.refs.userName.value;
         var pw = this.refs.passWord.value;
-        if (type == 'login') {
+        if (type === 'login') {
             if (usn !== "" && pw !== "") {
                 this
                     .props
                     .commit('login', usn, pw);
+                event.preventDefault();
+                event.stopPropagation();
             }
         } else {
             var pw2 = this.refs.passWord2.value;
-            if (pw != pw2) {
+            if (pw !== pw2) {
                 alert("两次密码不相同，请重新输入");
             } else {
                 if (usn !== "" && pw !== "") {
                     this
                         .props
                         .commit('register', usn, pw);
+                    event.preventDefault();
+                    event.stopPropagation();
                 }
             }
         }
-        event.preventDefault();
     }
 
     handleSelect(e) {
@@ -43,7 +46,7 @@ class Login extends Component {
     }
 
     render() {
-        var pannel = <form className="form-signin">
+        var pannel = <div className="form-signin">
             <label htmlFor="inputEmail" className="sr-only">UserName</label>
             <input
                 ref="userName"
@@ -64,9 +67,9 @@ class Login extends Component {
                 onClick={this
                 .submit
                 .bind(this, 'login')}>登录</button>
-        </form>;
-        if (this.state.active != 'login') 
-            pannel = <form className="form-signin">
+        </div>;
+        if (this.state.active !== 'login') 
+            pannel = <div className="form-signin">
                 <label htmlFor="inputEmail" className="sr-only">UserName</label>
                 <input
                     ref="userName"
@@ -95,7 +98,7 @@ class Login extends Component {
                     onClick={this
                     .submit
                     .bind(this, 'register')}>注册</button>
-            </form>;
+            </div>;
         return (
             <div className="container">
                 <Nav

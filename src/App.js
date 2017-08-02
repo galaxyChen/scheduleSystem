@@ -1,9 +1,9 @@
 import React, {Component} from 'react';
-import logo from './logo.svg';
 import './App.css';
 import Login from './Login';
 import NavList from './NavList';
 import MainView from './MainView';
+import Sender from './sender';
 
 
 class App extends Component {
@@ -11,13 +11,39 @@ class App extends Component {
   constructor() {
     super();
     this.state = {
-      login: true,
-      user:'test'
+      login: false,
+      user:'test',
+      module:'today'
+    }
+  }
+
+  loginCommit(data){
+    if (data.status===1){
+       this.setState({
+         login:true
+       })
+    } else {
+      document.write(data);
     }
   }
 
   handleLogin(type, usn, pw) {
-    this.setState({login: false})
+    var ins = {
+        ins:type,
+        usn:usn,
+        password:pw
+      }
+    var sender = new Sender();
+    sender.getData(ins,this.loginCommit.bind(this));
+      this.setState({
+        user:usn
+      })
+  }
+
+  changeModule(module){
+    this.setState({
+      module:module
+    })
   }
 
   render() {
@@ -26,8 +52,8 @@ class App extends Component {
         .handleLogin
         .bind(this)}/>
     return <div>
-      <NavList userName={'Tester'}/>
-      <MainView usn={this.state.user}/>
+      <NavList userName={'Tester'} changeModule={this.changeModule.bind(this)}/>
+      <MainView usn={this.state.user} module={this.state.module}/>
     </div>
   }
 }

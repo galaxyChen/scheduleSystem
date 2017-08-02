@@ -1,7 +1,6 @@
 var backSide="http://localhost/php/index.php";
 function sender(){
     function getData(data,received){
-        var res;
         fetch(backSide, {
                 method: "POST",
                 header: {

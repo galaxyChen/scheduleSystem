@@ -12,7 +12,6 @@ import Panel from 'react-bootstrap/lib/Panel';
 import Glyphicon from 'react-bootstrap/lib/Glyphicon';
 import InfiniteCalendar from 'react-infinite-calendar';
 import 'react-infinite-calendar/styles.css';
-import Sender from './sender';
 
 class AddModal extends Component {
     constructor(props) {
@@ -75,6 +74,7 @@ class AddModal extends Component {
                         break;
                 case 19:result='晚上';
                         break;
+                default:
             }
         return result;
     }
@@ -155,7 +155,7 @@ class AddModal extends Component {
                 changeList:changeList
             })
         }
-        if (type=='title'){
+        if (type==='title'){
             this.setState({
                 title:e.target.value
             })
@@ -174,7 +174,6 @@ class AddModal extends Component {
                 changeList:changeList
             })
         }
-        var event = window.event || arguments.callee.caller.arguments[0];
         var stateList = ['doing', 'wait', 'emergent', 'todo', 'finish'];
         var stateTitle=['进行中','等待','紧急','待安排','完成'];
         var stateStyle=['primary','warning','danger','info','success'];
@@ -186,7 +185,7 @@ class AddModal extends Component {
     }
 
     showTimePicker(type){
-        if (type=='begin'){
+        if (type==='begin'){
             this.setState({
                 showBeginTimePicker:true
             })
@@ -217,8 +216,8 @@ class AddModal extends Component {
     }
 
     generateTime(type){
-        var date = type=='begin'?this.state.beginDate:this.state.endDate;
-        var time = type=='begin'?this.state.beginTime:this.state.endTime;
+        var date = type==='begin'?this.state.beginDate:this.state.endDate;
+        var time = type==='begin'?this.state.beginTime:this.state.endTime;
         // console.log(date);
         // console.log(time);
         switch(time){
@@ -232,9 +231,10 @@ class AddModal extends Component {
                         break;        
             case '晚上':date.setHours(19);
                         break;
+            default:
         }
         // console.log(date.getHours());
-        return date.valueOf();
+        return date.getTime();
     }
 
     commitEdit(){
@@ -243,7 +243,7 @@ class AddModal extends Component {
             return;
         }
         var data={};
-        if (this.state.title==''){
+        if (this.state.title===''){
             alert("标题必须填写！");
             return ;
         } 
@@ -279,7 +279,7 @@ class AddModal extends Component {
             return ;
         }
         var data={};
-        if (this.state.title==''){
+        if (this.state.title===''){
             alert("标题必须填写！");
             return ;
         } else data['title']=this.state.title;
@@ -330,6 +330,8 @@ class AddModal extends Component {
 
     render() {
         var today = new Date();
+        today.setDate(today.getDate()-7);
+        console.log(today);
         return (
 
             <Modal show={this.props.show} onHide={this.props.close}>
