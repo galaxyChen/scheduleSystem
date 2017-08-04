@@ -30,6 +30,7 @@ function FliterRules(){
     }
 
     function filterData(module,mode,data){
+        console.log(module);
         var result={
             outOfDate:[],
             now:[],
@@ -56,7 +57,9 @@ function FliterRules(){
                     return true;
                 else return false;
             })
+            console.log(data);
         }
+        
 
         if (module==="wait"){
             data = data.filter((value,index,arr)=>{
@@ -136,13 +139,13 @@ function FliterRules(){
         
         if (module==="todo"){
             result = {
-                todo:result.todo
+                todo:data
             }
         }
 
         if (module==="wait"){
             result = {
-                wait:result.wait
+                wait:data
             }
         }
 

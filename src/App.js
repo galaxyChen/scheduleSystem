@@ -11,7 +11,7 @@ class App extends Component {
   constructor() {
     super();
     this.state = {
-      login: false,
+      login: true,
       user:'test',
       module:'today'
     }
@@ -52,7 +52,7 @@ class App extends Component {
         .handleLogin
         .bind(this)}/>
     return <div>
-      <NavList userName={'Tester'} changeModule={this.changeModule.bind(this)}/>
+      <NavList userName={this.state.user} changeModule={this.changeModule.bind(this)}/>
       <MainView usn={this.state.user} module={this.state.module}/>
     </div>
   }

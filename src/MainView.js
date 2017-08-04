@@ -32,6 +32,7 @@ class MainView extends Component {
     }
 
     setData(data){
+        console.log(data.data);
         if (typeof data==='string'){
             document.write(data);
             return;

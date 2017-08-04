@@ -5,58 +5,87 @@ import Button from 'react-bootstrap/lib/Button';
 import FormGroup from 'react-bootstrap/lib/FormGroup';
 import ControlLabel from 'react-bootstrap/lib/ControlLabel';
 import FormControl from 'react-bootstrap/lib/FormControl';
-import Checkbox from 'react-bootstrap/lib/Checkbox';
 import DropdownButton from 'react-bootstrap/lib/DropdownButton';
 import MenuItem from 'react-bootstrap/lib/MenuItem';
 import Panel from 'react-bootstrap/lib/Panel';
-import Glyphicon from 'react-bootstrap/lib/Glyphicon';
 import InfiniteCalendar from 'react-infinite-calendar';
 import 'react-infinite-calendar/styles.css';
+import Checkbox from 'react-bootstrap/lib/Checkbox';
 
-class AddModal extends Component {
+class AddRoutine extends Component {
     constructor(props) {
         super(props);
-        var isEdit=false;
-        var modalTitle = '添加日程';
-        var timeSelect = true;
+
+        var isEdit = true;
+        if (props.isAdd)
+            isEdit=false;
+
+        var modalTitle = '添加每日任务';
+        if (isEdit)
+            modalTitle = "修改每日任务";
+
+        var beginDate = new Date();
+        var beginTime = '上午';
+        var endDate = new Date();
+        var endTime = '上午';
+        if (isEdit){
+            beginDate = new Date(props.data.begin-0);
+            beginTime = this.getTimeHelper(beginDate);
+            if (props.endTime)
+                endDate = new Date(props.data.end-0);
+            endTime = this.getTimeHelper(endDate);
+        }
+        var beginDateForSHow = beginDate.getFullYear()+"-"+(beginDate.getMonth()+1)+"-"+beginDate.getDate();
+        var endDateForShow = endDate.getFullYear()+"-"+(endDate.getMonth()+1)+"-"+endDate.getDate();
+        var endTimeSelect = false;
+        if (props.endTime)
+            endTimeSelect = true;
+
+        var everyTitle = "每1天";
+        var every=1;
+        if (isEdit){
+            everyTitle="每"+props.data.every+"天";;
+            every=props.data.every;
+        }
+
         var status="doing";
-        if (!props.data.isAdd){
-            isEdit=true;
-            modalTitle = '修改日程';
-            timeSelect = props.data.begin&&props.data.end;
+        var statusStyle="primary";
+        var statusTitle="进行中";
+        if (isEdit){
             status = props.data.status;
+            var stateList = {
+                doing: 'primary',
+                finish: 'success',
+                todo: 'info',
+            }
+            var stateTitle = {
+                doing: '进行中',
+                finish: '已完成',
+                todo: '将做',
+            }
+            statusStyle = stateList[status];
+            statusTitle = stateTitle[status];
         }
-        var stateList = {
-            doing: 'primary',
-            finish: 'success',
-            todo: 'info',
-            wait: 'warning',
-            emergent: 'danger'
-        }
-        var stateTitle = {
-            doing: '进行中',
-            finish: '已完成',
-            todo: '将做',
-            wait: '等待',
-            emergent: '紧急'
-        }
-        var statusTitle = stateTitle[status];
-        var statusStyle = stateList[status];
+        var every = 1;
+        if (isEdit)
+            every = props.data.every;
         this.state = {
             modalTitle: modalTitle,
-            beginDate:'',
-            endDate:'',
-            beginDateForShow:'',
-            endDateForShow:'',
-            beginTime:"",
-            endTime:"",
-            timeSelect:timeSelect,
+            beginDate:beginDate,
+            endDate:endDate,
+            beginDateForShow:beginDateForSHow,
+            endDateForShow:endDateForShow,
+            beginTime:beginTime,
+            endTime:endTime,
             showBeginTimePicker:false,
             showEndTimePicker:false,
-            statusTitle:statusTitle,
-            statusStyle:statusStyle,
+            endTimeSelect:endTimeSelect,
+            everyTitle:everyTitle,
+            every:every,
             status:status,
-            isEdit:isEdit
+            isEdit:isEdit,
+            statusStyle:statusStyle,
+            statusTitle:statusTitle
         }
     }
 
@@ -77,57 +106,12 @@ class AddModal extends Component {
             }
         return result;
     }
-
-    componentWillMount() {
-        var beginDate = new Date();
-        var endDate = new Date();
-        var beginTime = '上午';
-        var endTime = '下午';
-        var timeSelect=true;
-        if (!this.props.data.isAdd){
-            if (!this.props.data.begin){
-                timeSelect=false;
-            } else {
-                beginDate = new Date(this.props.data.begin-0);
-                endDate = new Date(this.props.data.end-0);
-                beginTime = this.getTimeHelper(beginDate);
-                endTime = this.getTimeHelper(endDate);
-            }
-        }
-        var beginDateForSHow = beginDate.getFullYear()+"-"+(beginDate.getMonth()+1)+"-"+beginDate.getDate();
-        var endDateForShow = endDate.getFullYear()+"-"+(endDate.getMonth()+1)+"-"+endDate.getDate();
-        this.setState({
-            beginDate:beginDate,
-            endDate:endDate,
-            beginDateForShow:beginDateForSHow,
-            endDateForShow:endDateForShow,
-            beginTime:beginTime,
-            endTime:endTime,
-            timeSelect:timeSelect
-        })
-    }
     
-
-    changeTimeSelect(e) {
-        //to set future option
-        if (this.state.isEdit){
-            var changeList = this.state.changeList||[];
-            changeList['begin']=true;
-            changeList['end']=true;
-            this.setState({
-                changeList:changeList
-            })
-        }
-        this.setState({
-            timeSelect:!e.target.checked
-        })
-    }
-
     changeTime(e){
         //use for change the time (AM,PM) 
         //0-4 begin, 5-9 end
         if (this.state.isEdit){
-            var changeList = this.state.changeList||[];
+            var changeList = this.state.changeList||{};
             var type = e>4?'end':'begin'
             changeList[type]=true;
             this.setState({
@@ -148,7 +132,7 @@ class AddModal extends Component {
 
     changeText(type,e){
         if (this.state.isEdit){
-            var changeList = this.state.changeList||[];
+            var changeList = this.state.changeList||{};
             changeList[type]=true;
             this.setState({
                 changeList:changeList
@@ -165,23 +149,6 @@ class AddModal extends Component {
         }
     }
 
-    changeStatus(e) {
-        if (this.state.isEdit){
-            var changeList = this.state.changeList||[];
-            changeList['status']=true;
-            this.setState({
-                changeList:changeList
-            })
-        }
-        var stateList = ['doing', 'wait', 'emergent', 'todo', 'finish'];
-        var stateTitle=['进行中','等待','紧急','待安排','完成'];
-        var stateStyle=['primary','warning','danger','info','success'];
-        this.setState({
-            status:stateList[e],
-            statusTitle:stateTitle[e],
-            statusStyle:stateStyle[e]
-        })
-    }
 
     showTimePicker(type){
         if (type==='begin'){
@@ -249,28 +216,30 @@ class AddModal extends Component {
         if (this.state.changeList['description']){
             data['description']=this.state.description;
         }
-        if (this.state.changeList['status'])
-            data['status']=this.state.status;
         if (this.state.changeList['begin']){
             data['begin']=this.generateTime('begin');
-            if (data['status']==="todo"||data['status']===undefined)
-                data['status']="doing";
         }
         if (this.state.changeList['end']){
-            data['end']=this.generateTime('end');
-            if (data['status']==="todo"||data['status']===undefined)
-                data['status']="doing";            
+            data['end']=this.generateTime('end');          
         }
-        if ((!this.state.timeSelect)){
-            data['status']='todo';
-            data['begin']=null;
+        if ((!this.state.endTimeSelect)&&(this.state.changeList['end'])){
             data['end']=null;
         }
+        if (this.state.changeList['every']){
+            data['every']=this.state.every;   
+        }
+        if (this.state.changeList['status']){
+            data['status']=this.state.status;
+        }
+        this.setState({
+            changeList:{}
+        })
         this.props.commitAdd(data);
     }
 
+
     commitAdd(){
-        if (this.state.beginDate>this.state.endDate){
+        if ((this.state.endTimeSelect)&&(this.state.beginDate>this.state.endDate)){
             alert("结束时间不能比开始时间更早！");
             return ;            
         }
@@ -285,25 +254,13 @@ class AddModal extends Component {
         } else data['title']=this.state.title;
         if (this.state.description)
             data['description']=this.state.description;
-        if (this.state.timeSelect){
-            data['begin']=this.generateTime('begin');
-            data['end']=this.generateTime('end');
-        }
-        data['status']=this.state.status;
-        if (!this.state.timeSelect)
-            data['status']='todo';
+        data['begin']=this.generateTime('begin');
+        data['end']=this.generateTime('end');
         this.props.commitAdd(data);
     }
     
 
     confirmBeginTime(){
-        if (this.state.isEdit){
-            var changeList = this.state.changeList||[];
-            changeList['begin']=true;
-            this.setState({
-                changeList:changeList
-            })
-        }
         var date=this.state.beginDate;
         var dateDefault = date.getFullYear()+"-"+(date.getMonth()+1)+"-"+date.getDate();
         this.setState({
@@ -313,18 +270,65 @@ class AddModal extends Component {
     }
 
     confirmEndTime(){
-        if (this.state.isEdit){
-            var changeList = this.state.changeList||[];
-            changeList['end']=true;
-            this.setState({
-                changeList:changeList
-            })
-        }
         var date=this.state.endDate;
         var dateDefault = date.getFullYear()+"-"+(date.getMonth()+1)+"-"+date.getDate();
         this.setState({
             endDateForShow:dateDefault,
             showEndTimePicker:false
+        })
+    }
+
+    changeEndTimeSelect(){
+        if (this.state.isEdit){
+            var changeList = this.state.changeList||{};
+            changeList['end']=true;
+            this.setState({
+                changeList:changeList
+            })
+        }
+        this.setState({
+            endTimeSelect:!this.state.endTimeSelect
+        })
+    }
+
+    changeEvery(e){
+        if (this.state.isEdit){
+            var changeList = this.state.changeList||{};
+            changeList['every']=true;
+            this.setState({
+                changeList:changeList
+            })
+        }
+        this.setState({
+            every:e,
+            everyTitle:"每"+e+"天"
+        })
+    }
+
+    changeStatus(e){
+        if (this.state.isEdit){
+            var changeList = this.state.changeList||{};
+            changeList['status']=true;
+            this.setState({
+                changeList:changeList
+            })
+        }
+        var stateList = ['doing', 'todo', 'finish'];
+        var newState = stateList[e];
+        var stateList = {
+            doing: 'primary',
+            finish: 'success',
+            todo: 'info',
+        }
+        var stateTitle = {
+            doing: '进行中',
+            finish: '已完成',
+            todo: '将做',
+        }
+        this.setState({
+            status:newState,
+            statusStyle:stateList[newState],
+            statusTitle:stateTitle[newState]
         })
     }
 
@@ -359,13 +363,8 @@ class AddModal extends Component {
                             onChange={this.changeText.bind(this,'description')}
                             defaultValue={this.props.data.description||""}/>
                             
-
-                        <Checkbox onChange={this.changeTimeSelect.bind(this)} checked={!this.state.timeSelect}>
-                            将来
-                        </Checkbox>
-
-                        <Panel collapsible expanded={this.state.timeSelect}>
-                            <div className="time-select">
+                    <Panel className="begin-time">
+                        <div>
                                 <a className='h4 right-space'>
                                     开始时间
                                 </a>
@@ -399,7 +398,7 @@ class AddModal extends Component {
                                         <Button bsStyle="danger" onClick={this.closeTimePicker.bind(this)}>取消</Button>
                                     </Modal.Footer>
                                 </Modal>
-
+                    
                                 <DropdownButton
                                     bsStyle={'default'}
                                     title={this.state.beginTime}
@@ -412,8 +411,12 @@ class AddModal extends Component {
                                     <MenuItem eventKey={4}>晚上</MenuItem>
                                 </DropdownButton>
                             </div>
-
-
+                        </Panel>
+                        <Checkbox onChange={this.changeEndTimeSelect.bind(this)} checked={this.state.endTimeSelect}>
+                            定期结束
+                        </Checkbox>
+                        <Panel collapsible expanded={this.state.endTimeSelect}>
+                            
                             <div>
                                 <a className='h4 right-space'>
                                     结束时间
@@ -462,20 +465,33 @@ class AddModal extends Component {
                             </div>
                         </Panel>
                     </FormGroup>
-                    <div className="status-button">
-                    <DropdownButton                               
+                    <div>
+                        <h4>重复：</h4>
+                        <DropdownButton
+                                    bsStyle={'default'}
+                                    title={this.state.everyTitle}
+                                    onSelect={this.changeEvery.bind(this)}
+                                    id={'end-time-tab'}>
+                                    <MenuItem eventKey={1}>每1天</MenuItem>
+                                    <MenuItem eventKey={2}>每2天</MenuItem>
+                                    <MenuItem eventKey={3}>每3天</MenuItem>
+                                    <MenuItem eventKey={4}>每4天</MenuItem>
+                                    <MenuItem eventKey={5}>每5天</MenuItem>
+                                    <MenuItem eventKey={6}>每6天</MenuItem>
+                                    <MenuItem eventKey={7}>每7天</MenuItem>
+                                </DropdownButton>
+                    </div>
+                    <DropdownButton
                                 bsStyle={this.state.statusStyle}
                                 title={this.state.statusTitle}
                                 onSelect={this.changeStatus.bind(this)}
-                                id={'status'}>
+                                id={this.props.data.routine_id||1}
+                                className="status-button-routine"
+                                >
                                 <MenuItem eventKey={0}>进行中</MenuItem>
-                                <MenuItem eventKey={1}>等待</MenuItem>
-                                <MenuItem eventKey={2}>紧急</MenuItem>
-                                <MenuItem eventKey={3}>将做</MenuItem>
-                                <MenuItem eventKey={4}>完成</MenuItem>
+                                <MenuItem eventKey={1}>将做</MenuItem>
+                                <MenuItem eventKey={2}>完成</MenuItem>
                             </DropdownButton>
-                    </div>
-                    <Button disabled><Glyphicon glyph="plus-sign" />&nbsp;&nbsp;&nbsp;&nbsp;添加子任务</Button>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button bsStyle="primary" onClick={this.commitAdd.bind(this)}>确定</Button>
@@ -487,11 +503,12 @@ class AddModal extends Component {
     }
 }
 
-AddModal.propTypes = {
+AddRoutine.propTypes = {
     show: PropTypes.bool.isRequired,
     close: PropTypes.func.isRequired,
     commitAdd:PropTypes.func.isRequired,
-    data:PropTypes.object.isRequired
+    data:PropTypes.object.isRequired,
+    isAdd:PropTypes.bool.isRequired
 };
 
-export default AddModal;
+export default AddRoutine;

@@ -88,7 +88,7 @@ class Login extends Component {
                 <label htmlFor="inputPassword2" className="sr-only">Password</label>
                 <input
                     ref="passWord2"
-                    type="password2"
+                    type="password"
                     id="inputPassword2"
                     className="form-control"
                     placeholder="重复输入密码"

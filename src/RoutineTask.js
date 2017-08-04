@@ -5,10 +5,10 @@ import MenuItem from 'react-bootstrap/lib/MenuItem';
 import Grid from 'react-bootstrap/lib/Grid';
 import Row from 'react-bootstrap/lib/Row';
 import Col from 'react-bootstrap/lib/Col';
-import AddModal from './AddModal';
+import AddRoutine from './AddRoutine';
 import './css.css';
 
-class Task extends Component {
+class RoutineTask extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -29,36 +29,31 @@ class Task extends Component {
         })
     }
 
-    changeStatus(e) {
-        var event = window.event || arguments.callee.caller.arguments[0];
-        var stateList = ['doing', 'wait', 'emergent', 'todo', 'finish'];
-        var newState = stateList[e];
-        var data = {
-            status:newState
-        }
-        this
-            .props
-            .changeTask(this.props.data.task_id,data);
-        event.stopPropagation();
-    }
 
     commitEdit(data){
-        console.log(data);
         this.props.changeTask(this.props.data.task_id,data);
         this.close();
     }
 
     renderTime(time){
         if (time===undefined)
-            return "无";
+            return "";
         var date = new Date(time-0);
 
         return date.getMonth()+1+"-"+date.getDate();
     }
 
-    renderTitle(title){
-        //add some length control if needed
-        return title;
+    changeStatus(e) {
+        var event = window.event || arguments.callee.caller.arguments[0];
+        var stateList = ['doing', 'todo', 'finish'];
+        var newState = stateList[e];
+        var data = {
+            status:newState
+        }
+        this
+            .props
+            .changeTask(this.props.data.routine_id,data);
+        event.stopPropagation();
     }
 
     render() {
@@ -67,15 +62,11 @@ class Task extends Component {
             doing: 'primary',
             finish: 'success',
             todo: 'info',
-            wait: 'warning',
-            emergent: 'danger'
         }
         var stateTitle = {
             doing: '进行中',
             finish: '已完成',
             todo: '将做',
-            wait: '等待',
-            emergent: '紧急'
         }
         data.state = stateList[data.status];
         data.stateTitle = stateTitle[data.status];
@@ -84,42 +75,40 @@ class Task extends Component {
                 <Grid fluid>
                     <Row>
                         <Col sm={6} xs={8} md={6} onClick={this.show.bind(this)}>
-                            <a className="h4 task-title" >{this.renderTitle(data.title)}
+                            <a className="h4 task-title" >{data.title}
                             </a>
                         </Col>
                         <Col sm={2} md={2} xsHidden>
-                             <a className="h4 task-title" >{data.status==="todo"?"":"从:"+this.renderTime(data.begin)}
+                             <a className="h4 task-title" >{this.renderTime(data.end)}
                             </a>
                         </Col>
                         <Col sm={2} md={2} xsHidden>
-                             <a className="h4 task-title" >{data.status==="todo"?"":"到:"+this.renderTime(data.end)}
-                             </a>
+                             <a className="h4 task-title" >{"每"+data.every+"天"}
+                            </a>
                         </Col>
                         <Col sm={2} xs={4} md={2}>
                             <DropdownButton
                                 bsStyle={data.state}
                                 title={data.stateTitle}
                                 onSelect={this.changeStatus.bind(this)}
-                                id={data.task_id||1}
+                                id={data.routine_id||1}
                                 >
                                 <MenuItem eventKey={0}>进行中</MenuItem>
-                                <MenuItem eventKey={1}>等待</MenuItem>
-                                <MenuItem eventKey={2}>紧急</MenuItem>
-                                <MenuItem eventKey={3}>将做</MenuItem>
-                                <MenuItem eventKey={4}>完成</MenuItem>
+                                <MenuItem eventKey={1}>将做</MenuItem>
+                                <MenuItem eventKey={2}>完成</MenuItem>
                             </DropdownButton>
                         </Col>
                     </Row>
                 </Grid>
-                <AddModal show={this.state.show} close={this.close.bind(this)} commitAdd={this.commitEdit.bind(this)} data={this.props.data}/>
+                <AddRoutine show={this.state.show} close={this.close.bind(this)} commitAdd={this.commitEdit.bind(this)} data={this.props.data} isAdd={false}/>
             </div>
         );
     }
 }
 
-Task.propTypes = {
+RoutineTask.propTypes = {
     data: PropTypes.object.isRequired,
-    changeTask: PropTypes.func.isRequired
+    changeTask: PropTypes.func.isRequired,
 };
 
-export default Task;
+export default RoutineTask;

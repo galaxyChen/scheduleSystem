@@ -69,7 +69,6 @@ class TaskList extends Component {
                                 break;
                 default:
             }
-            console.log(name);
             if (this.props.data[name].length>0)
                 TaskPanelList.push(<TaskPanel key={index} title={title} titleStyle={style} changeTask={this.props.changeTask} data={this.props.data[name]} />);
             index++;

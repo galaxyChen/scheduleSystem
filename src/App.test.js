@@ -2,13 +2,26 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import InfiniteCalendar from 'react-infinite-calendar';
 import 'react-infinite-calendar/styles.css';
-import Task from './Task';
+import RoutineTask from './RoutineTask';
+import AddRoutine from './AddRoutine';
 
 class App extends Component {
   constructor(){
     super();
+    var date = new Date();
+    date.setDate(date.getDate()-6);
     this.state={
-      status:'doing'
+      status:'doing',
+      show:true,
+      data:{
+            title:"test",
+            every:2,  
+            status:"doing",
+            routine_id:1,
+            title:"test",
+            description:"tester",
+            begin:date.getTime()
+        }
     }
   }
 
@@ -16,10 +29,19 @@ class App extends Component {
     console.log(t.getDate());
   }
 
-  handleChange(state){
+  handleChange(id,data){
+    console.log(data);
+    var updateData = this.state.data;
+    for (var name in data){
+      updateData[name]=data[name];
+    }
     this.setState({
-      status:state
+      data:updateData
     })
+  }
+
+  close(){
+
   }
 
   render() {
@@ -30,7 +52,7 @@ class App extends Component {
     }
     return (
       <div>
-        <Task data={data} changeTask={this.handleChange.bind(this)}/>
+        <RoutineTask  data={this.state.data} changeTask={this.handleChange.bind(this)}/>
       </div>
     );
   }
