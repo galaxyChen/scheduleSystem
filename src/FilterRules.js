@@ -30,7 +30,6 @@ function FliterRules(){
     }
 
     function filterData(module,mode,data){
-        console.log(module);
         var result={
             outOfDate:[],
             now:[],
@@ -74,6 +73,14 @@ function FliterRules(){
                 if (value.status==="finish")
                     return true;
                 else return false;
+            })
+        }
+
+        if (module==="routine"){
+            data = data.filter((value,index,arr)=>{
+                if (value.status==="finish")
+                    return false;
+                else return true;
             })
         }
         //classify
@@ -146,6 +153,12 @@ function FliterRules(){
         if (module==="wait"){
             result = {
                 wait:data
+            }
+        }
+
+        if (module==="routine"){
+            result = {
+                routine:data
             }
         }
 

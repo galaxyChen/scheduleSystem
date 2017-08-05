@@ -255,7 +255,11 @@ class AddRoutine extends Component {
         if (this.state.description)
             data['description']=this.state.description;
         data['begin']=this.generateTime('begin');
-        data['end']=this.generateTime('end');
+        if (this.state.endTimeSelect)
+            data['end']=this.generateTime('end');
+        else data['end']=null;
+        data['status']=this.state.status;
+        data['every']=this.state.every;
         this.props.commitAdd(data);
     }
     

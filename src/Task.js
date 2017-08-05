@@ -38,13 +38,13 @@ class Task extends Component {
         }
         this
             .props
-            .changeTask(this.props.data.task_id,data);
+            .changeTask(this.props.data.task_id,data,"task");
         event.stopPropagation();
     }
 
     commitEdit(data){
         console.log(data);
-        this.props.changeTask(this.props.data.task_id,data);
+        this.props.changeTask(this.props.data.task_id,data,"task");
         this.close();
     }
 

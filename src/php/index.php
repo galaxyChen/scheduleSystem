@@ -11,11 +11,17 @@ switch ($data->ins){
                 break;
     case 'register':register($data);
                 break;
-    case 'add':add($data);
+    case 'add':add($data,"task");
                 break;
-    case 'query':query($data);
+    case 'addRoutine':add($data,"routine");
                 break;
-    case 'update':update($data);
+    case 'query':query($data,"task");
+                break;
+    case 'update':update($data,"task");
+                break;
+    case 'routine':query($data,"routine");
+                break;
+    case 'updateRoutine':update($data,"routine");
                 break;
 }
 
@@ -61,21 +67,23 @@ function register($data){
     echo json_encode($response);
 }
 
-function add($data){
+function add($data,$table){
     $sql = new SQL();
     $sql->type = 'i';
-    $sql->table = 'task';
+    $sql->table = $table;
     $addData =(array) $data->data;
     $key = array_keys($addData);
     $n = count($key);
     for ($i=0;$i<$n;$i++)
-        $sql->add($key[$i],$addData[$key[$i]]);
+        if ($addData[$key[$i]])
+            $sql->add($key[$i],$addData[$key[$i]]);
     $sql->add('usn',$data->usn);
     $result = mysqli_run($sql);
     $response=array();
     if (gettype($result)=='integer'){
         $response['status']=1;
         $response['id']=$result;
+        $response['type']=$table;
     } else {
         $response['status']=0;
         $response['error']=$result;
@@ -83,11 +91,12 @@ function add($data){
     echo json_encode($response);
 }
 
-function query($data){
+function query($data,$table){
     $sql = new SQL();
     $sql->type = 's';
-    $sql->table = 'task';
+    $sql->table = $table;
     $sql->add('usn',$data->usn);
+    $sql->add_not('status','finish');
     $result = mysqli_run($sql);
     $response=array();    
     if (gettype($result)=='array'){
@@ -100,17 +109,18 @@ function query($data){
     echo json_encode($response);
 }
 
-function update($data){
+function update($data,$table){
     $sql = new SQL();
     $sql->type = 'u';
-    $sql->table = 'task';
-    $sql->add('task_id',$data->id);
+    $sql->table = $table;
+    $sql->add($table.'_id',$data->id);
     
     $updateData = (array)$data->data;
     $key = array_keys($updateData);
     $n = count($key);
     for ($i=0;$i<$n;$i++){
-        $sql->add_update_col($key[$i],$updateData[$key[$i]]);
+        if ($updateData[$key[$i]])
+            $sql->add_update_col($key[$i],$updateData[$key[$i]]);
     }
 
     $result=mysqli_run($sql);
@@ -118,11 +128,14 @@ function update($data){
     if (gettype($result)=='integer'){
         $response['status']=1;
         $response['id']=$result;
+        $response['type']=$table;
     } else {
         $response['status']=0;
         $response['error']=$result;
+        $response['type']=$table;
     }
     echo json_encode($response);
 }
+
 
 ?>

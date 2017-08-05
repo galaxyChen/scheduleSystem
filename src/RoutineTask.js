@@ -31,7 +31,7 @@ class RoutineTask extends Component {
 
 
     commitEdit(data){
-        this.props.changeTask(this.props.data.task_id,data);
+        this.props.changeTask(this.props.data.routine_id,data,"routine");
         this.close();
     }
 
@@ -52,7 +52,7 @@ class RoutineTask extends Component {
         }
         this
             .props
-            .changeTask(this.props.data.routine_id,data);
+            .changeTask(this.props.data.routine_id,data,"routine");
         event.stopPropagation();
     }
 

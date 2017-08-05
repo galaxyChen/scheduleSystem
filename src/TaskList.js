@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import Task from './Task';
 import './css.css';
 import Panel from 'react-bootstrap/lib/Panel';
+import RoutineTask from './RoutineTask'
 
 class TaskPanel extends Component {
     constructor(props) {
@@ -18,7 +19,9 @@ class TaskPanel extends Component {
 
     render() {
         var taskList = this.props.data.map((value, index) => {
-                return <Task data={value} key={index} changeTask={this.props.changeTask}/>
+            if (this.props.module==="routine")
+                return <RoutineTask data={value} key={index} changeTask={this.props.changeTask}/>
+            else return <Task data={value} key={index} changeTask={this.props.changeTask}/>
             })
         var header = <h3 onClick={this.showPanel.bind(this)}>{this.props.title}</h3>
         return (
@@ -33,7 +36,8 @@ TaskPanel.propTypes = {
     changeTask: PropTypes.func.isRequired,
     title:PropTypes.string.isRequired,
     titleStyle:PropTypes.string.isRequired,
-    data:PropTypes.array.isRequired
+    data:PropTypes.array.isRequired,
+    module:PropTypes.string.isRequired
 }
 
 class TaskList extends Component {
@@ -67,12 +71,16 @@ class TaskList extends Component {
                 case "emergent":title="紧急长任务";
                                 style="danger";
                                 break;
+                case "routine":title="日常任务";
+                                style="info";
+                                break;
                 default:
             }
             if (this.props.data[name].length>0)
-                TaskPanelList.push(<TaskPanel key={index} title={title} titleStyle={style} changeTask={this.props.changeTask} data={this.props.data[name]} />);
+                TaskPanelList.push(<TaskPanel key={index} title={title} titleStyle={style} changeTask={this.props.changeTask} data={this.props.data[name]} module={this.props.module}/>);
             index++;
         }
+
 
 
         return (
@@ -86,7 +94,8 @@ class TaskList extends Component {
 TaskList.propTypes = {
     data: PropTypes.object.isRequired,
     mode: PropTypes.string.isRequired,
-    changeTask: PropTypes.func.isRequired
+    changeTask: PropTypes.func.isRequired,
+    module:PropTypes.string.isRequired
 };
 
 export default TaskList;
