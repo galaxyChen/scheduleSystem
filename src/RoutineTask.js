@@ -43,16 +43,28 @@ class RoutineTask extends Component {
         return date.getMonth()+1+"-"+date.getDate();
     }
 
+    finishRoutine(e){
+        if (e===2){
+            var data = {
+                last_finish:new Date().getTime()
+            }
+            this.props.changeTask(this.props.data.routine_id,data,"routine");
+        }
+    }
+
     changeStatus(e) {
         var event = window.event || arguments.callee.caller.arguments[0];
+        if (this.props.module!=="routine"){
+            this.finishRoutine(e);
+            event.stopPropagation();
+            return;
+        }
         var stateList = ['doing', 'todo', 'finish'];
         var newState = stateList[e];
         var data = {
             status:newState
         }
-        this
-            .props
-            .changeTask(this.props.data.routine_id,data,"routine");
+        this.props.changeTask(this.props.data.routine_id,data,"routine");
         event.stopPropagation();
     }
 

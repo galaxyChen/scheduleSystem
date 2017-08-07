@@ -8,7 +8,7 @@ class Fliter extends Component {
     constructor(props){
         super(props);
         this.state={
-            active:"time"
+            active:"begintime"
         }
     }
 
@@ -23,9 +23,9 @@ class Fliter extends Component {
         return (
             <div>
                 <Nav stacked bsStyle="pills" activeKey={this.state.active} onSelect={this.handleSelect.bind(this)}>
-                    <NavItem eventKey={"time"} >时间排序</NavItem>
+                    <NavItem eventKey={"begintime"} >开始时间排序</NavItem>
+                    <NavItem eventKey={"endtime"} >结束时间排序</NavItem>
                     <NavItem eventKey={"state"} >状态排序</NavItem>
-                    <NavItem eventKey={"important"} >紧急排序</NavItem>
                 </Nav>
             </div>
         );

@@ -1,9 +1,73 @@
 function FliterRules(){
+    var module = "";
+    var mode = "";
+    var __self = this;
+
+    function compareBegin(a,b){
+        var aBegin;
+        var bBegin;
+
+        if (a.begin)
+            aBegin = new Date(a.begin-0);
+        else aBegin = new Date();
+
+        if (b.begin)
+            bBegin = new Date(b.begin-0);
+        else bBegin = new Date();
+
+        if (compare(aBegin,bBegin)>0)
+            return 1;
+        if (compare(aBegin,bBegin)<0)
+            return -1;
+        return 0;
+    }
+
+    function compareEnd(a,b){
+        var aEnd;
+        var bEnd;
+
+        if (a.end)
+            aEnd = new Date(a.end-0);
+        else aEnd = new Date();
+
+        if (b.end)
+            bEnd = new Date(b.end-0);
+        else bEnd = new Date();
+        if (compare(aEnd,bEnd)>0)
+            return 1;
+        if (compare(aEnd,bEnd)<0)
+            return -1;
+        return 0;
+    }
+
+    function compareState(a,b){
+        var statusOrder = {
+            "doing":2,
+            "emergent":1,
+            "wait":3
+        }
+        var orderA = statusOrder[a.status]||10;
+        var orderB = statusOrder[b.status]||10;
+        if (orderA>orderB) return 1;
+        else if (orderA<orderB) return -1;
+        else return 0;
+    }
+
+    function sort(arr){
+        if (__self.mode==="begintime")
+            return arr.sort(compareBegin);
+        if (__self.mode==="endtime")
+            return arr.sort(compareEnd);
+        if (__self.mode==="state")
+            return arr.sort(compareState);
+    }
 
     function compare(a,b){
         //a<b,return -1
         //a=b,return 0
         //a>b,return 1
+        a = a ||new Date();
+        b = b ||new Date();
         var A = {
             year:a.getYear(),
             month:a.getMonth(),
@@ -30,6 +94,8 @@ function FliterRules(){
     }
 
     function filterData(module,mode,data){
+        __self.module=module;
+        __self.mode=mode;
         var result={
             outOfDate:[],
             now:[],
@@ -38,7 +104,8 @@ function FliterRules(){
             once:[],
             tomorrow:[],
             todo:[],
-            wait:[]
+            wait:[],
+            routine:[]
         };
         if (data===undefined) return result;
         //filter wait,finish,todo
@@ -50,13 +117,39 @@ function FliterRules(){
             })
         }
 
+        if (module.slice(0,8)==="everyday"){
+            console.log(data);
+            data = data.filter((value,index,arr)=>{
+                if (value.status==="finish")
+                    return false;
+                else return true;
+            })
+            var mo = module.slice(9);
+            var today = new Date();
+            if (mo==="tomorrow")
+                today.setDate(today.getDate()+1);
+            data.forEach((value,index)=>{
+                let begin = new Date(value.begin-0);
+                let interval = parseInt(Math.abs(today-begin)/(1000*60*60*24));
+                console.log(interval);
+                if (interval%value.every===0){
+                    if (!value.last_finish){
+                        result.routine.push(value);
+                    } else {
+                        console.log(value.last_finish);
+                        if (compare(new Date(value.last_finish-0),today)<0)
+                            result.routine.push(value);
+                    }
+                }
+            })
+        }
+
         if (module==="todo"){
             data = data.filter((value,index,arr)=>{
                 if (value.status==="todo")
                     return true;
                 else return false;
             })
-            console.log(data);
         }
         
 
@@ -112,53 +205,60 @@ function FliterRules(){
 
         if (module==='schedule'){
             data.forEach((element)=>{
-                var begin = new Date(element.begin);
-                var end = new Date(element.end);
+                var begin = new Date(element.begin-0);
+                var end = new Date(element.end-0);
                 if (compare(begin,end)===0)
                     result.once.push(element);
                 if (compare(begin,end)===-1)
                     result.longterm.push(element);
             })
         }
-
+        //reset result
         if (module==="today"){
-            delete result.tomorrow;
-            delete result.wait;
-            delete result.todo;
-            delete result.finish;
-            delete result.once;
+            result = {
+                now:sort(result.now),
+                emergent:sort(result.emergent),
+                longterm:sort(result.longterm),
+                outOfDate:sort(result.outOfDate)
+            }
         }
 
         if (module==="tomorrow"){
-            delete result.now;
-            delete result.wait;
-            delete result.todo;
-            delete result.finish;
-            delete result.once;
+            result = {
+                tomorrow:sort(result.tomorrow),
+                emergent:sort(result.emergent),
+                longterm:sort(result.longterm)
+            }
         }
 
         if (module==="shedule"){
             result = {
-                once:result.once,
-                longterm:result.longterm
+                once:sort(result.once),
+                longterm:sort(result.longterm)
             }
         }
         
         if (module==="todo"){
             result = {
-                todo:data
+                todo:sort(data)
             }
         }
 
         if (module==="wait"){
             result = {
-                wait:data
+                wait:sort(data)
             }
         }
 
         if (module==="routine"){
             result = {
-                routine:data
+                routine:sort(data)
+            }
+        }
+
+        if (module.slice(0,8)==="everyday"){
+            result = {
+                routine:result.routine
             }
         }
 

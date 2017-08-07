@@ -293,6 +293,7 @@ class AddModal extends Component {
         if (!this.state.timeSelect)
             data['status']='todo';
         this.props.commitAdd(data);
+        
     }
     
 

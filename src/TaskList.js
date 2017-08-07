@@ -19,11 +19,13 @@ class TaskPanel extends Component {
 
     render() {
         var taskList = this.props.data.map((value, index) => {
-            if (this.props.module==="routine")
-                return <RoutineTask data={value} key={index} changeTask={this.props.changeTask}/>
+            if (value.hasOwnProperty("routine_id"))
+                return <RoutineTask data={value} key={index} changeTask={this.props.changeTask} module={this.props.module}/>
             else return <Task data={value} key={index} changeTask={this.props.changeTask}/>
             })
-        var header = <h3 onClick={this.showPanel.bind(this)}>{this.props.title}</h3>
+        var header = <h3 onClick={this.showPanel.bind(this)}>{this.props.title}</h3>;
+        if (this.props.data.length===0)
+            return <div></div>;
         return (
             <Panel collapsible expanded={this.state.show} header={header} bsStyle={this.props.titleStyle}>
                 {taskList}
@@ -81,7 +83,7 @@ class TaskList extends Component {
             index++;
         }
 
-
+        TaskPanelList.push(<TaskPanel key={index} title={"日常任务"} titleStyle={"warning"} changeTask={this.props.changeTask} data={this.props.routine.routine||[]} module={this.props.module}/>)
 
         return (
             <div className={"task-list"}>

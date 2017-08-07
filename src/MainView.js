@@ -17,8 +17,9 @@ class MainView extends Component {
         super(props);
         this.state={
             show:false,
-            mode:'time',
-            oldData:[]
+            mode:'begintime',
+            oldData:[],
+            routine:[]
         }
     }
 
@@ -31,20 +32,13 @@ class MainView extends Component {
             usn:this.props.usn
         }
         sender.getData(data,this.setData.bind(this));
+         var data = {
+            ins:'routine',
+            usn:this.props.usn
+        }
+        sender.getData(data,this.setData.bind(this));
     }
 
-    componentWillReceiveProps(nextProps) {
-        if (nextProps.module==="routine"){
-            var sender = new Sender();
-            var data = {
-                ins:'routine',
-                usn:this.props.usn
-            }
-            sender.getData(data,this.setData.bind(this));
-        }
-    }
-    
-    
 
     setData(data){
         console.log(data.data);
@@ -115,6 +109,7 @@ class MainView extends Component {
         }
     }
 
+
     changeTask(id,newData,type){
         var ins = {
             ins:'update',
@@ -183,9 +178,15 @@ class MainView extends Component {
             ins.ins="addRoutine";
         var sender = new Sender();
         sender.getData(ins,this.refreshData.bind(this));
-        this.setState({
-            routineToAdd:data
-        })
+        if (this.props.module==="routine"){
+            this.setState({
+                routineToAdd:data
+            })
+        } else {
+            this.setState({
+                dataToAdd:data
+            })
+        }
         this.close();
     }
 
@@ -199,9 +200,12 @@ class MainView extends Component {
         var addModal = <AddModal show={this.state.show} close={this.close.bind(this)} commitAdd={this.commitAdd.bind(this)} data={{isAdd:true}}/>;
         if (this.props.module==="routine")
             addModal = <AddRoutine show={this.state.show} close={this.close.bind(this)} commitAdd={this.commitAdd.bind(this)} isAdd={true} data={{}}/>;
+        if (!this.state.show)
+            addModal=null;
         var filter = new FilterRules();
         var data = this.props.module==="routine"?this.state.routine:this.state.data;
         var taskList = filter.filterData(this.props.module,this.state.mode,data);
+        var routine = filter.filterData("everyday_"+this.props.module,this.state.mode,this.state.routine);
         return (
             <div>
                 <Grid fluid>
@@ -214,7 +218,7 @@ class MainView extends Component {
                                     <Button onClick={this.showAdd.bind(this)}><Glyphicon glyph="plus-sign" />添加日程</Button>
                                 </Col>
                                 <Col xs={12}>
-                                    <TaskList module={this.props.module} data={taskList} mode={'normal'} changeTask={this.changeTask.bind(this)}/>
+                                    <TaskList module={this.props.module} data={taskList} mode={'normal'} changeTask={this.changeTask.bind(this)} routine={routine}/>
                                 </Col>
                             
                         </Col>
