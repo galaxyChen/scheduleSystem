@@ -119,8 +119,9 @@ function update($data,$table){
     $key = array_keys($updateData);
     $n = count($key);
     for ($i=0;$i<$n;$i++){
-        if ($updateData[$key[$i]])
+        if (gettype($updateData[$key[$i]])!='NUll'){
             $sql->add_update_col($key[$i],$updateData[$key[$i]]);
+        }
     }
 
     $result=mysqli_run($sql);

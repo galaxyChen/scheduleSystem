@@ -112,8 +112,7 @@ class AddModal extends Component {
         //to set future option
         if (this.state.isEdit){
             var changeList = this.state.changeList||[];
-            changeList['begin']=true;
-            changeList['end']=true;
+            changeList['timeSelect']=true;
             this.setState({
                 changeList:changeList
             })
@@ -261,10 +260,16 @@ class AddModal extends Component {
             if (data['status']==="todo"||data['status']===undefined)
                 data['status']="doing";            
         }
-        if ((!this.state.timeSelect)){
-            data['status']='todo';
-            data['begin']=null;
-            data['end']=null;
+        if (this.state.changeList['timeSelect']){
+            if (!this.state.timeSelect){
+                data['status']='todo';
+                data['begin']=null;
+                data['end']=null;
+            }
+            else {
+                 data['begin']=this.generateTime('begin');
+                 data['end']=this.generateTime('end');
+            }
         }
         this.props.commitAdd(data);
     }

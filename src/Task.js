@@ -79,6 +79,8 @@ class Task extends Component {
         }
         data.state = stateList[data.status];
         data.stateTitle = stateTitle[data.status];
+        var addModal = <AddModal show={this.state.show} close={this.close.bind(this)} commitAdd={this.commitEdit.bind(this)} data={this.props.data}/>;
+        if (!this.state.show) addModal=null;
         return (
             <div className="task">
                 <Grid fluid>
@@ -111,7 +113,7 @@ class Task extends Component {
                         </Col>
                     </Row>
                 </Grid>
-                <AddModal show={this.state.show} close={this.close.bind(this)} commitAdd={this.commitEdit.bind(this)} data={this.props.data}/>
+                {addModal}
             </div>
         );
     }

@@ -36,11 +36,10 @@ class RoutineTask extends Component {
     }
 
     renderTime(time){
-        if (time===undefined)
+        if (!time)
             return "";
         var date = new Date(time-0);
-
-        return date.getMonth()+1+"-"+date.getDate();
+        return (date.getMonth()+1)+"-"+date.getDate();
     }
 
     finishRoutine(e){

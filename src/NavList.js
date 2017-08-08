@@ -46,6 +46,7 @@ class NavList extends Component {
                         <NavItem eventKey={"todo"}>待安排</NavItem>
                         <NavItem eventKey={"wait"}>等待</NavItem>
                         <NavItem eventKey={"routine"}>每日任务</NavItem>
+                        <NavItem eventKey={"process"}>进度条</NavItem>
                     </Nav>
                 </Navbar.Collapse>
             </Navbar>

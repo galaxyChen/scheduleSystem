@@ -11,6 +11,7 @@ import Glyphicon from 'react-bootstrap/lib/Glyphicon';
 import './css.css';
 import Sender from './sender';
 import FilterRules from './FilterRules';
+import ProcessView from './ProcessView';
 
 class MainView extends Component {
     constructor(props){
@@ -41,7 +42,6 @@ class MainView extends Component {
 
 
     setData(data){
-        console.log(data.data);
         if (typeof data==='string'){
             document.write(data);
             return;
@@ -197,32 +197,36 @@ class MainView extends Component {
     }
 
     render() {
+        //generate add modal
         var addModal = <AddModal show={this.state.show} close={this.close.bind(this)} commitAdd={this.commitAdd.bind(this)} data={{isAdd:true}}/>;
         if (this.props.module==="routine")
             addModal = <AddRoutine show={this.state.show} close={this.close.bind(this)} commitAdd={this.commitAdd.bind(this)} isAdd={true} data={{}}/>;
         if (!this.state.show)
             addModal=null;
+        //filter data
         var filter = new FilterRules();
         var data = this.props.module==="routine"?this.state.routine:this.state.data;
         var taskList = filter.filterData(this.props.module,this.state.mode,data);
         var routine = filter.filterData("everyday_"+this.props.module,this.state.mode,this.state.routine);
+        //generate mainview
+        var mainView = <div>
+            <Col sm={3} md={3} xs={3}>
+                <Button onClick={this.showAdd.bind(this)}><Glyphicon glyph="plus-sign" />添加日程</Button>
+            </Col>
+            <Col xs={12}>
+                <TaskList module={this.props.module} data={taskList} mode={'normal'} changeTask={this.changeTask.bind(this)} routine={routine}/>
+            </Col>   
+        </div>;
+        if (this.props.module==="process")
+             mainView = <ProcessView data={taskList||{}} />;
         return (
             <div>
-                <Grid fluid>
-                    
+                <Grid fluid>         
                         <Col xsHidden sm={3} md={3}>
                             <Filter changeMode={this.changeMode.bind(this)}/></Col>
-                        <Col sm={8} md={8} xs={12}>
-                            
-                                <Col sm={3} md={3} xs={3}>
-                                    <Button onClick={this.showAdd.bind(this)}><Glyphicon glyph="plus-sign" />添加日程</Button>
-                                </Col>
-                                <Col xs={12}>
-                                    <TaskList module={this.props.module} data={taskList} mode={'normal'} changeTask={this.changeTask.bind(this)} routine={routine}/>
-                                </Col>
-                            
-                        </Col>
-                    
+                        <Col sm={8} md={8} xs={12}>                            
+                            {mainView}                        
+                        </Col>                 
                 </Grid>
                 {addModal}
             </div>

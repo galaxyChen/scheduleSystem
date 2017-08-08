@@ -117,8 +117,20 @@ function FliterRules(){
             })
         }
 
+        if (module==="process"){
+            data = data.filter((value,index,arr)=>{
+                if (value.status==="doing"||value.status==="wait")
+                    return true;
+                else return false;
+            })
+            data = data.filter((value,index,arr)=>{
+                if (value.begin&&value.end)
+                    return true;
+                else return false;
+            })
+        }
+
         if (module.slice(0,8)==="everyday"){
-            console.log(data);
             data = data.filter((value,index,arr)=>{
                 if (value.status==="finish")
                     return false;
@@ -131,12 +143,10 @@ function FliterRules(){
             data.forEach((value,index)=>{
                 let begin = new Date(value.begin-0);
                 let interval = parseInt(Math.abs(today-begin)/(1000*60*60*24));
-                console.log(interval);
                 if (interval%value.every===0){
                     if (!value.last_finish){
                         result.routine.push(value);
                     } else {
-                        console.log(value.last_finish);
                         if (compare(new Date(value.last_finish-0),today)<0)
                             result.routine.push(value);
                     }
@@ -259,6 +269,12 @@ function FliterRules(){
         if (module.slice(0,8)==="everyday"){
             result = {
                 routine:result.routine
+            }
+        }
+
+        if (module==="process"){
+            result = {
+                process:sort(data)
             }
         }
 

@@ -82,8 +82,8 @@ class TaskList extends Component {
                 TaskPanelList.push(<TaskPanel key={index} title={title} titleStyle={style} changeTask={this.props.changeTask} data={this.props.data[name]} module={this.props.module}/>);
             index++;
         }
-
-        TaskPanelList.push(<TaskPanel key={index} title={"日常任务"} titleStyle={"warning"} changeTask={this.props.changeTask} data={this.props.routine.routine||[]} module={this.props.module}/>)
+        if (this.props.module!=="routine"&&this.props.module!=="wait")
+            TaskPanelList.push(<TaskPanel key={index} title={"日常任务"} titleStyle={"warning"} changeTask={this.props.changeTask} data={this.props.routine.routine||[]} module={this.props.module}/>)
 
         return (
             <div className={"task-list"}>
